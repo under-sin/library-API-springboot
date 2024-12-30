@@ -5,6 +5,8 @@ import github.under_sin.libraryapi.model.Autor;
 import github.under_sin.libraryapi.repository.AutorRepository;
 import github.under_sin.libraryapi.repository.LivroRepository;
 import github.under_sin.libraryapi.validator.AutorValidator;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,6 +58,21 @@ public class AutorService {
             return autorRepository.findByNascionalidade(nascionalidade);
 
         return autorRepository.findAll();
+    }
+
+    public List<Autor> pesquisaByExample(String nome, String nascionalidade) {
+        var autor = new Autor();
+        autor.setNome(nome);
+        autor.setNascionalidade(nascionalidade);
+
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIgnorePaths("id", "idUsuario", "dataNascimento") // ignora os campos passados
+                .withIgnoreCase() // ignora os cases (tudo lowercase)
+                .withIgnoreNullValues() // faz a pequisa apenas pelos campos passados no objeto (nome, nascionalidade)
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING); // %like%
+        Example<Autor> autorExample = Example.of(autor, matcher);
+        return autorRepository.findAll(autorExample);
     }
 
     public boolean existeLivroParaAutor(Autor autor) {

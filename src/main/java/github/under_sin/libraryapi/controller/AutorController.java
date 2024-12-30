@@ -6,6 +6,7 @@ import github.under_sin.libraryapi.exception.OperacaoNaoPermitidaException;
 import github.under_sin.libraryapi.exception.RegistroDuplicadoException;
 import github.under_sin.libraryapi.model.Autor;
 import github.under_sin.libraryapi.service.AutorService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class AutorController {
     private AutorService autorService;
 
     @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody AutorDTO autor) {
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO autor) {
         try {
             Autor autorEntity = autor.mapeiaParaAutor();
             autorService.salvar(autorEntity);
@@ -44,7 +45,7 @@ public class AutorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody AutorDTO dto) {
+    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
         try {
             Optional<Autor> autorOptional = autorService.obterPorId(id);
             if (autorOptional.isEmpty()) {
@@ -83,8 +84,9 @@ public class AutorController {
     public ResponseEntity<Object> deletar(@PathVariable("id") String idAutor) {
         try {
             Optional<Autor> autorOptional = autorService.obterPorId(idAutor);
-            if (autorOptional.isEmpty())
+            if (autorOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
+            }
 
             Autor autor = autorOptional.get();
             autorService.deletar(autor);
@@ -99,7 +101,7 @@ public class AutorController {
     public ResponseEntity<List<AutorDTO>> pesquisar(
             @RequestParam(value = "nome", required = false) String nome,
             @RequestParam(value = "nascionalidade", required = false) String nascionalidade) {
-        List<Autor> autorResponse = autorService.pesquisar(nome, nascionalidade);
+        List<Autor> autorResponse = autorService.pesquisaByExample(nome, nascionalidade);
         List<AutorDTO> autor = autorResponse
                 .stream()
                 .map(a -> new AutorDTO(
