@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface LivroRepository extends JpaRepository<Livro, UUID> {
@@ -20,6 +21,7 @@ public interface LivroRepository extends JpaRepository<Livro, UUID> {
     List<Livro> findByAutor(Autor autor);
     List<Livro> findByTituloAndPreco(String titulo, BigDecimal preco);
     List<Livro> findByTituloOrGenero(String titulo, GeneroLivro genero);
+    Optional<Livro> findByIsbn(String isbn);
 
     // JPQL -> referencia as entidades e as propriedades da classe e não do banco de dados
     @Query(" select l from Livro as l order by l.titulo, l.preco ")

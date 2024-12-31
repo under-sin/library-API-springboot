@@ -2,6 +2,9 @@ package github.under_sin.libraryapi.model;
 
 import github.under_sin.libraryapi.model.enums.GeneroLivro;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,7 +12,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "livro")
+@Table(name = "livro", schema = "public")
+@EntityListeners(AuditingEntityListener.class)
 public class Livro {
 
     @Id
@@ -33,9 +37,11 @@ public class Livro {
     @Column(name = "preco", precision = 18, scale = 2)
     private BigDecimal preco;
 
+    @CreatedDate
     @Column(name = "data_criacao", updatable = false)
     private LocalDateTime dataCriacao;
 
+    @LastModifiedDate
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
@@ -45,6 +51,8 @@ public class Livro {
     @JoinColumn(name = "id_autor", nullable = false)
     private Autor autor;
 
+    @Column(name = "id_usuario")
+    private UUID idUsuario;
 
     public UUID getId() {
         return id;
@@ -114,15 +122,12 @@ public class Livro {
         this.autor = autor;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.dataCriacao = LocalDateTime.now();
-        this.dataAtualizacao = LocalDateTime.now();
+    public UUID getIdUsuario() {
+        return idUsuario;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.dataAtualizacao = LocalDateTime.now();
+    public void setIdUsuario(UUID idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     @Override

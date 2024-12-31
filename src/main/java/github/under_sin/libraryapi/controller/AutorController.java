@@ -1,16 +1,13 @@
 package github.under_sin.libraryapi.controller;
 
 import github.under_sin.libraryapi.controller.dto.AutorDTO;
-import github.under_sin.libraryapi.controller.dto.ErroResposta;
-import github.under_sin.libraryapi.exception.OperacaoNaoPermitidaException;
-import github.under_sin.libraryapi.exception.RegistroDuplicadoException;
+import github.under_sin.libraryapi.controller.mappers.AutorMapper;
 import github.under_sin.libraryapi.model.Autor;
 import github.under_sin.libraryapi.service.AutorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -19,82 +16,57 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("autores")
-public class AutorController {
+public class AutorController implements GenericController {
 
     @Autowired
     private AutorService autorService;
 
-    @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO autor) {
-        try {
-            Autor autorEntity = autor.mapeiaParaAutor();
-            autorService.salvar(autorEntity);
+    @Autowired
+    private AutorMapper mapper;
 
-            // vai criar a uri de retorno para localizar a entidade criada
-            // http://localhost:8080/autores/{id}
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(autorEntity.getId())
-                    .toUri();
-            return ResponseEntity.created(location).build();
-        } catch (RegistroDuplicadoException ex) {
-            ErroResposta resposta = ErroResposta.conflito(ex.getMessage());
-            return ResponseEntity.status(resposta.status()).body(resposta);
-        }
+    @PostMapping
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto) {
+        Autor autor = mapper.toEntity(dto);
+        autorService.salvar(autor);
+        URI location = gerarHeaderLocation(autor.getId());
+        return ResponseEntity.created(location).build();
     }
 
     @PutMapping("{id}")
     public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
-        try {
-            Optional<Autor> autorOptional = autorService.obterPorId(id);
-            if (autorOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
+        Optional<Autor> autorOptional = autorService.obterPorId(id);
+        if (autorOptional.isEmpty())
+            return ResponseEntity.notFound().build();
 
-            Autor autor = autorOptional.get();
-            autor.setNome(dto.nome());
-            autor.setNascionalidade(dto.nascionalidade());
-            autor.setDataNascimento(dto.dataNascimento());
-            autorService.atualizar(autor);
-            return ResponseEntity.noContent().build();
-        } catch (RegistroDuplicadoException ex) {
-            ErroResposta resposta = ErroResposta.conflito(ex.getMessage());
-            return ResponseEntity.status(resposta.status()).body(resposta);
-        }
+        Autor autor = autorOptional.get();
+        autor.setNome(dto.nome());
+        autor.setNascionalidade(dto.nascionalidade());
+        autor.setDataNascimento(dto.dataNascimento());
+        autorService.atualizar(autor);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("{id}")
     public ResponseEntity<AutorDTO> obterDetalhes(@PathVariable("id") String idAutor) {
-        Optional<Autor> autorOptional = autorService.obterPorId(idAutor);
-        if(autorOptional.isPresent()) {
-            Autor autor = autorOptional.get();
-            AutorDTO dto = new AutorDTO(
-                    autor.getId(),
-                    autor.getNome(),
-                    autor.getDataNascimento(),
-                    autor.getNascionalidade());
-            return ResponseEntity.ok(dto);
-        }
-
-        return ResponseEntity.notFound().build();
+        // podemos usar essa sintax quando trabalhamos com optinal
+        return autorService
+            .obterPorId(idAutor)
+            .map(autor -> {
+                AutorDTO dto = mapper.toDTO(autor);
+                return ResponseEntity.ok(dto);
+            }).orElseGet( () -> ResponseEntity.notFound().build() );
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deletar(@PathVariable("id") String idAutor) {
-        try {
-            Optional<Autor> autorOptional = autorService.obterPorId(idAutor);
-            if (autorOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
+        Optional<Autor> autorOptional = autorService.obterPorId(idAutor);
+        if (autorOptional.isEmpty())
+            return ResponseEntity.notFound().build();
 
-            Autor autor = autorOptional.get();
-            autorService.deletar(autor);
-            return ResponseEntity.noContent().build();
-        } catch (OperacaoNaoPermitidaException ex) {
-            ErroResposta erroResposta = ErroResposta.respostaPadrao(ex.getMessage());
-            return ResponseEntity.status(erroResposta.status()).body(erroResposta);
-        }
+        Autor autor = autorOptional.get();
+        autorService.deletar(autor);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -103,13 +75,9 @@ public class AutorController {
             @RequestParam(value = "nascionalidade", required = false) String nascionalidade) {
         List<Autor> autorResponse = autorService.pesquisaByExample(nome, nascionalidade);
         List<AutorDTO> autor = autorResponse
-                .stream()
-                .map(a -> new AutorDTO(
-                    a.getId(),
-                    a.getNome(),
-                    a.getDataNascimento(),
-                    a.getNascionalidade())
-                ).collect(Collectors.toList());
+            .stream()
+            .map(mapper::toDTO) // como o .map tem o autor como referencia, podemos passar o mapper dessa forma
+            .collect(Collectors.toList());
         return ResponseEntity.ok(autor);
     }
 }
