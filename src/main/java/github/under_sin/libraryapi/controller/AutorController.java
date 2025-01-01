@@ -25,7 +25,7 @@ public class AutorController implements GenericController {
     private AutorMapper mapper;
 
     @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto) {
+    public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto) {
         Autor autor = mapper.toEntity(dto);
         autorService.salvar(autor);
         URI location = gerarHeaderLocation(autor.getId());
@@ -33,7 +33,7 @@ public class AutorController implements GenericController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
+    public ResponseEntity<Void> atualizar(@PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
         Optional<Autor> autorOptional = autorService.obterPorId(id);
         if (autorOptional.isEmpty())
             return ResponseEntity.notFound().build();
@@ -60,13 +60,12 @@ public class AutorController implements GenericController {
 
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deletar(@PathVariable("id") String idAutor) {
-        Optional<Autor> autorOptional = autorService.obterPorId(idAutor);
-        if (autorOptional.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        Autor autor = autorOptional.get();
-        autorService.deletar(autor);
-        return ResponseEntity.noContent().build();
+        return autorService
+            .obterPorId(idAutor)
+            .map(autor -> {
+                autorService.deletar(autor);
+                return ResponseEntity.noContent().build();
+            }).orElseGet( () -> ResponseEntity.notFound().build() );
     }
 
     @GetMapping

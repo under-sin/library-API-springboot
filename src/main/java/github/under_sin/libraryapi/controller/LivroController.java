@@ -1,7 +1,7 @@
 package github.under_sin.libraryapi.controller;
 
 import github.under_sin.libraryapi.controller.dto.CadastroLivroDTO;
-import github.under_sin.libraryapi.controller.dto.RespostaPesquisaLivroDTO;
+import github.under_sin.libraryapi.controller.dto.ResultadoPesquisaLivroDTO;
 import github.under_sin.libraryapi.controller.mappers.LivroMapper;
 import github.under_sin.libraryapi.model.Livro;
 import github.under_sin.libraryapi.service.LivroService;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("livros")
@@ -25,7 +24,7 @@ public class LivroController implements GenericController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody @Valid CadastroLivroDTO dto) {
+    public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto) {
         Livro livro = mapper.toEntity(dto);
         service.salvar(livro);
         URI location = gerarHeaderLocation(livro.getId());
@@ -33,13 +32,22 @@ public class LivroController implements GenericController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<RespostaPesquisaLivroDTO> obterDetalhes(@PathVariable("id") String id) {
-        Optional<Livro> livroOptional = service.obterPorId(id);
-        if (livroOptional.isPresent()) {
-            Livro livro = livroOptional.get();
-            RespostaPesquisaLivroDTO resposta = RespostaPesquisaLivroDTO.criaRespostaDTO(livro);
-            return ResponseEntity.ok(resposta);
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<ResultadoPesquisaLivroDTO> obterDetalhes(@PathVariable("id") String id) {
+        return service
+            .obterPorId(id)
+            .map(livro -> {
+                var dto = mapper.toDTO(livro);
+                return ResponseEntity.ok(dto);
+            }).orElseGet( () -> ResponseEntity.notFound().build() );
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Object> deletar(@PathVariable("id") String id) {
+        return service
+            .obterPorId(id)
+            .map(livro -> {
+                service.deletar(livro);
+                return ResponseEntity.noContent().build();
+            }).orElseGet( () -> ResponseEntity.notFound().build() );
     }
 }
