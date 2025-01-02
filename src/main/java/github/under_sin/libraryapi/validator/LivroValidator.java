@@ -1,6 +1,6 @@
 package github.under_sin.libraryapi.validator;
 
-import github.under_sin.libraryapi.exception.OperacaoNaoPermitidaException;
+import github.under_sin.libraryapi.exception.CampoInvalidoException;
 import github.under_sin.libraryapi.exception.RegistroDuplicadoException;
 import github.under_sin.libraryapi.model.Livro;
 import github.under_sin.libraryapi.repository.LivroRepository;
@@ -12,6 +12,8 @@ import java.util.Optional;
 @Component
 public class LivroValidator {
 
+    private static final int ANO_EXIGENCIA_PRECO = 2020;
+
     private final LivroRepository livroRepository;
 
     public LivroValidator(LivroRepository livroRepository) {
@@ -21,10 +23,9 @@ public class LivroValidator {
     public void validar(Livro livro) {
         if(existeLivroComIsbn(livro))
             throw new RegistroDuplicadoException("Isbn Duplicado");
+
         if(validarPreco(livro))
-            throw new OperacaoNaoPermitidaException("O preço é obrigatório para publicação a partir de 2020");
-        if(validarSeTemAutor(livro))
-            throw new OperacaoNaoPermitidaException("Não foi possível encontrar o autor");
+            throw new CampoInvalidoException("preco", "Para livro publicados a partir de 2020 o preço é obrigatório");
     }
 
     private boolean existeLivroComIsbn(Livro livro) {
@@ -36,13 +37,9 @@ public class LivroValidator {
     }
 
     private boolean validarPreco(Livro livro) {
-        if (livro.getDataPublicacao().getYear() >= 2020)
+        if (livro.getDataPublicacao().getYear() >= ANO_EXIGENCIA_PRECO)
             return !(livro.getPreco() != null && livro.getPreco().compareTo(BigDecimal.ZERO) > 0);
 
         return false;
-    }
-
-    private boolean validarSeTemAutor(Livro livro) {
-        return livro.getAutor() == null;
     }
 }

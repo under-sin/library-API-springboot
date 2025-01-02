@@ -32,6 +32,9 @@ public class AutorService {
     }
 
     public void atualizar(Autor autor) {
+        if (autor.getId() == null)
+            throw new IllegalArgumentException("Só é possível atualizar um autor cadastrado na base");
+
         validator.validar(autor);
         autorRepository.save(autor);
     }
