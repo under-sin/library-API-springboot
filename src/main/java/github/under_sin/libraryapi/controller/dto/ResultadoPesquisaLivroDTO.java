@@ -1,6 +1,5 @@
 package github.under_sin.libraryapi.controller.dto;
 
-import github.under_sin.libraryapi.model.Livro;
 import github.under_sin.libraryapi.model.enums.GeneroLivro;
 
 import java.math.BigDecimal;
@@ -14,4 +13,5 @@ public record ResultadoPesquisaLivroDTO(
         LocalDate dataPublicacao,
         GeneroLivro genero,
         BigDecimal preco,
-        AutorDTO autor) { }
+        AutorDTO autor) {
+}

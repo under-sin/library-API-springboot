@@ -23,9 +23,9 @@ public class GlobalExceptionHandler {
     public ErroResposta handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         List<FieldError> fieldErrors = ex.getFieldErrors();
         List<ErroCampo> erroCampoList = fieldErrors
-            .stream()
-            .map(fe -> new ErroCampo(fe.getField(), fe.getDefaultMessage()))
-            .collect(Collectors.toList());
+                .stream()
+                .map(fe -> new ErroCampo(fe.getField(), fe.getDefaultMessage()))
+                .collect(Collectors.toList());
         return new ErroResposta(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de validação", erroCampoList);
     }
 
@@ -45,17 +45,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErroResposta handleCampoInvalidoException(CampoInvalidoException ex) {
         return new ErroResposta(
-            HttpStatus.UNPROCESSABLE_ENTITY.value(),
-            "Erro de validação",
-            List.of(new ErroCampo(ex.getCampo(), ex.getMessage())));
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Erro de validação",
+                List.of(new ErroCampo(ex.getCampo(), ex.getMessage())));
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErroResposta handleErrorNaoTratados(RuntimeException ex) {
         return new ErroResposta(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "Ocorreu um erro inesperado. Entre em contato com o nosso suporte",
-            List.of());
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Ocorreu um erro inesperado. Entre em contato com o nosso suporte",
+                List.of());
     }
 }

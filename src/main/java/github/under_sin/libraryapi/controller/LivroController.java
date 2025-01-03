@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("livros")
@@ -67,7 +65,6 @@ public class LivroController implements GenericController {
     ) {
         var resultado = service.pesquisa(isbn, titulo, nomeAutor, genero, anoPublicacao, pagina, tamanhoPagina);
         Page<ResultadoPesquisaLivroDTO> retorno = resultado.map(mapper::toDTO);
-
         return ResponseEntity.ok(retorno);
     }
 

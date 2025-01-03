@@ -51,21 +51,21 @@ public class AutorController implements GenericController {
     public ResponseEntity<AutorDTO> obterDetalhes(@PathVariable("id") String idAutor) {
         // podemos usar essa sintax quando trabalhamos com optinal
         return autorService
-            .obterPorId(idAutor)
-            .map(autor -> {
-                AutorDTO dto = mapper.toDTO(autor);
-                return ResponseEntity.ok(dto);
-            }).orElseGet( () -> ResponseEntity.notFound().build() );
+                .obterPorId(idAutor)
+                .map(autor -> {
+                    AutorDTO dto = mapper.toDTO(autor);
+                    return ResponseEntity.ok(dto);
+                }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deletar(@PathVariable("id") String idAutor) {
         return autorService
-            .obterPorId(idAutor)
-            .map(autor -> {
-                autorService.deletar(autor);
-                return ResponseEntity.noContent().build();
-            }).orElseGet( () -> ResponseEntity.notFound().build() );
+                .obterPorId(idAutor)
+                .map(autor -> {
+                    autorService.deletar(autor);
+                    return ResponseEntity.noContent().build();
+                }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
@@ -74,9 +74,9 @@ public class AutorController implements GenericController {
             @RequestParam(value = "nascionalidade", required = false) String nascionalidade) {
         List<Autor> autorResponse = autorService.pesquisaByExample(nome, nascionalidade);
         List<AutorDTO> autor = autorResponse
-            .stream()
-            .map(mapper::toDTO) // como o .map tem o autor como referencia, podemos passar o mapper dessa forma
-            .collect(Collectors.toList());
+                .stream()
+                .map(mapper::toDTO) // como o .map tem o autor como referencia, podemos passar o mapper dessa forma
+                .collect(Collectors.toList());
         return ResponseEntity.ok(autor);
     }
 }

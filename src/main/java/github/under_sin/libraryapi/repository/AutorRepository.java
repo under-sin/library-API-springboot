@@ -11,8 +11,11 @@ import java.util.UUID;
 public interface AutorRepository extends JpaRepository<Autor, UUID> {
 
     List<Autor> findByNome(String nome);
+
     List<Autor> findByNascionalidade(String nascionalidade);
+
     List<Autor> findByNomeAndNascionalidade(String nome, String nascionalidade);
+
     Optional<Autor> findByNomeAndNascionalidadeAndDataNascimento(
             String nome, String nascionalidade, LocalDate dataNascimento
     );
