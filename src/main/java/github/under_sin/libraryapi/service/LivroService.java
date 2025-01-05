@@ -1,8 +1,10 @@
 package github.under_sin.libraryapi.service;
 
 import github.under_sin.libraryapi.model.Livro;
+import github.under_sin.libraryapi.model.Usuario;
 import github.under_sin.libraryapi.model.enums.GeneroLivro;
 import github.under_sin.libraryapi.repository.LivroRepository;
+import github.under_sin.libraryapi.security.SecurityService;
 import github.under_sin.libraryapi.validator.LivroValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,14 +23,18 @@ public class LivroService {
 
     private final LivroRepository livroRepository;
     private final LivroValidator livroValidator;
+    private final SecurityService securityService;
 
-    public LivroService(LivroRepository livroRepository, LivroValidator livroValidator) {
+    public LivroService(LivroRepository livroRepository, LivroValidator livroValidator, SecurityService securityService) {
         this.livroRepository = livroRepository;
         this.livroValidator = livroValidator;
+        this.securityService = securityService;
     }
 
     public Livro salvar(Livro livro) {
         livroValidator.validar(livro);
+        Usuario usuario = securityService.obterUsuarioLogado();
+        livro.setUsuario(usuario);
         return livroRepository.save(livro);
     }
 

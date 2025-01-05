@@ -6,19 +6,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true) // configuração para permitir adicionar as regras de acesso direto na controller
 public class SecurityConfiguration {
 
     // configurando o sprig security para voltar a ficar como ele já vem por default
@@ -31,12 +30,12 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/login/**").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/usuarios/**").permitAll(); // vamos permitir que qualquer pessoal consiga criar um usuario
-                    authorize.requestMatchers("/autores/**").hasRole("ADMIN");
-                    authorize.requestMatchers("/livros/**").hasAnyRole("USER", "ADMIN");
-                    // Trabalhando com authority - uma role pode ter várias authoritys
-                    // authorize.requestMatchers(HttpMethod.DELETE, "/autores/**").hasAuthority("DELETAR_AUTOR");
 
                     authorize.anyRequest().authenticated(); // toda solicitação precisa ser autenticada
+                    // authorize.requestMatchers("/autores/**").hasRole("ADMIN");
+                    // authorize.requestMatchers("/livros/**").hasAnyRole("USER", "ADMIN");
+                    // Trabalhando com authority - uma role pode ter várias authoritys
+                    // authorize.requestMatchers(HttpMethod.DELETE, "/autores/**").hasAuthority("DELETAR_AUTOR");
                 }).build();
     }
 

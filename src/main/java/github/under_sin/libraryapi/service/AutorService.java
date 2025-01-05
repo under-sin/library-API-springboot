@@ -2,8 +2,10 @@ package github.under_sin.libraryapi.service;
 
 import github.under_sin.libraryapi.exception.OperacaoNaoPermitidaException;
 import github.under_sin.libraryapi.model.Autor;
+import github.under_sin.libraryapi.model.Usuario;
 import github.under_sin.libraryapi.repository.AutorRepository;
 import github.under_sin.libraryapi.repository.LivroRepository;
+import github.under_sin.libraryapi.security.SecurityService;
 import github.under_sin.libraryapi.validator.AutorValidator;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -18,16 +20,20 @@ public class AutorService {
 
     private final AutorRepository autorRepository;
     private final LivroRepository livroRepository;
+    private final SecurityService securityService;
     private final AutorValidator validator;
 
-    public AutorService(AutorRepository autorRepository, LivroRepository livroRepository, AutorValidator validator) {
+    public AutorService(AutorRepository autorRepository, LivroRepository livroRepository, SecurityService securityService, AutorValidator validator) {
         this.autorRepository = autorRepository;
         this.livroRepository = livroRepository;
+        this.securityService = securityService;
         this.validator = validator;
     }
 
     public Autor salvar(Autor autor) {
         validator.validar(autor);
+        Usuario usuario = securityService.obterUsuarioLogado();
+        autor.setUsuario(usuario);
         return autorRepository.save(autor);
     }
 
@@ -39,7 +45,8 @@ public class AutorService {
         autorRepository.save(autor);
     }
 
-    public Optional<Autor> obterPorId(String idAutor) {
+    public Optional<Autor>
+    obterPorId(String idAutor) {
         return autorRepository.findById(UUID.fromString(idAutor));
     }
 

@@ -51,8 +51,9 @@ public class Livro {
     @JoinColumn(name = "id_autor", nullable = false)
     private Autor autor;
 
-    @Column(name = "id_usuario")
-    private UUID idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
     public UUID getId() {
         return id;
@@ -122,12 +123,12 @@ public class Livro {
         this.autor = autor;
     }
 
-    public UUID getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(UUID idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     @Override
