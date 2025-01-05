@@ -30,6 +30,7 @@ public class DatabaseConfiguration {
     public DataSource dataSource() {
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setUrl(url);
+        
         ds.setUsername(username);
         ds.setPassword(password);
         ds.setDriverClassName(driver);

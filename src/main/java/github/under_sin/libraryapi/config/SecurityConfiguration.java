@@ -1,5 +1,7 @@
 package github.under_sin.libraryapi.config;
 
+import github.under_sin.libraryapi.security.CustomUserDetailsService;
+import github.under_sin.libraryapi.service.UsuarioService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -47,19 +49,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        UserDetails user1 = User.builder()
-                .username("usuario")
-                .password(encoder.encode("123"))
-                .roles("USER")
-                .build();
-
-        UserDetails user2 = User.builder()
-                .username("admin")
-                .password(encoder.encode("321"))
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user1, user2);
+    public UserDetailsService userDetailsService(UsuarioService usuarioService) {
+        // custom user details é onde o spring vai buscar os usuário para validar e autorizar
+        return new CustomUserDetailsService(usuarioService);
     }
 }
